@@ -1,0 +1,85 @@
+---
+apiVersion: v1
+data:
+  monitoring_config.txt: |-
+    prometheus_config: {
+      enable: true,
+      path: "/monitoring/prometheus/metrics"
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    ksonnet.io/component: mnist-model-component
+  name: mnist-model-name-config
+  namespace: kubeflow
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: mnist-model-name
+    ksonnet.io/component: mnist-model-component
+  name: mnist-model-name
+  namespace: kubeflow
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: null
+      labels:
+        app: mnist-model-name
+        version: v1
+    spec:
+      containers:
+      - args:
+        - --port=9000
+        - --rest_api_port=8500
+        - --model_name=mnist-model-name
+        - --model_base_path=s3://kubeflow-models/inception
+        - --monitoring_config_file=/var/config/monitoring_config.txt
+        command:
+        - /usr/bin/tensorflow_model_server
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: AWS_ACCESS_KEY_ID
+              name: secretname
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: AWS_SECRET_ACCESS_KEY
+              name: secretname
+        - name: AWS_REGION
+          value: us-west-1
+        - name: S3_USE_HTTPS
+          value: "false"
+        - name: S3_VERIFY_SSL
+          value: "false"
+        - name: S3_ENDPOINT
+          value: minio-service.kubeflow.svc:9000
+        image: tensorflow/serving:1.11.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          tcpSocket:
+            port: 9000
+        name: mnist-model-name
+        ports:
+        - containerPort: 9000
+        - containerPort: 8500
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /var/config/
+          name: config-volume
+      volumes:
+      - configMap:
+          name: mnist-model-name-config
+        name: config-volume

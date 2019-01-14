@@ -1,0 +1,37 @@
+---
+apiVersion: kubeflow.org/v1beta1
+kind: TFJob
+metadata:
+  labels:
+    ksonnet.io/component: train
+  name: mnist-train-local
+  namespace: kubeflow
+spec:
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/python
+            - /opt/model.py
+            env:
+            - name: TF_MODEL_DIR
+              value: gs://kubeflow-ci_temp/mnist-jlewi
+            - name: TF_EXPORT_DIR
+              value: gs://kubeflow-ci_temp/mnist-jlewi/export
+            - name: TF_TRAIN_STEPS
+              value: "200"
+            - name: TF_BATCH_SIZE
+              value: "100"
+            - name: TF_LEARNING_RATE
+              value: "0.01"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/user-gcp-sa.json
+            image: gcr.io/kubeflow-examples/mnist/model:v20190111-v0.2-148-g313770f
+            name: tensorflow
+            volumeMounts: []
+            workingDir: /opt
+          restartPolicy: OnFailure
+          volumes: []

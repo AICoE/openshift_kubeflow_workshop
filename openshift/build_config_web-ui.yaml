@@ -1,0 +1,32 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    name: tf-web-ui
+  name: tf-web-ui
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: tf-web-ui:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      uri: https://github.com/durandom/openshift_kubeflow_workshop.git
+    type: Git
+    contextDir: "containers/web-ui/"
+  strategy:
+    type: Docker
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: tf-web-ui
+spec:
+  dockerImageRepository: tf-web-ui
+  tags:
+  - name: latest
+  lookupPolicy:
+    local: true

@@ -1,0 +1,55 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: tf-serving
+  name: tf-serving
+spec:
+  template:
+    metadata:
+      labels:
+        app: tf-serving
+        version: v1
+    spec:
+      containers:
+      - image: tensorflow/serving:1.12.0
+        imagePullPolicy: IfNotPresent
+        name: tf-serving
+        args:
+        - --port=9000
+        - --rest_api_port=8500
+        - --model_name=mnist
+        - --model_base_path=s3://kubeflow/inception/export
+#        - --monitoring_config_file=/var/config/monitoring_config.txt
+        command:
+        - /usr/bin/tensorflow_model_server
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: minio
+        - name: AWS_SECRET_ACCESS_KEY
+          value: minio123
+        - name: AWS_REGION
+          value: us-west-1
+        - name: S3_REGION
+          value: us-east-1
+        - name: S3_USE_HTTPS
+          value: "0"
+        - name: S3_VERIFY_SSL
+          value: "0"
+        - name: S3_ENDPOINT
+          value: minio-service.kubeflow.svc:9000
+        - name: TF_CPP_MIN_LOG_LEVEL
+          value: "1"
+        livenessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          tcpSocket:
+            port: 9000
+        ports:
+        - containerPort: 9000
+        - containerPort: 8500
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi

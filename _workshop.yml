@@ -1,0 +1,18 @@
+id: "workshop"
+name: "Kubeflow on OpenShift"
+
+content:
+  url: https://raw.githubusercontent.com/durandom/openshift_kubeflow_workshop/master
+
+modules:
+  activate:
+  - introduction
+  - install-cli
+  - openshift
+  - kubernetes
+  - kubeflow
+  - training-build
+  - training-tf-job
+  - serving
+  - training-distributed
+  - links

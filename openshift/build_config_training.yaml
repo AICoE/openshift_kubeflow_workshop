@@ -1,0 +1,32 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    name: training
+  name: training
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: training:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      uri: https://github.com/durandom/openshift_kubeflow_workshop.git
+    type: Git
+    contextDir: "containers/training/"
+  strategy:
+    type: Docker
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: training
+spec:
+  dockerImageRepository: training
+  tags:
+  - name: latest
+  lookupPolicy:
+    local: true

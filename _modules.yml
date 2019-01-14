@@ -1,0 +1,53 @@
+config:
+  renderer: markdown
+  vars:
+    - name: OC_VERSION
+      desc: Expected oc version when `oc version` is executed
+      value: "oc v3.11.0+0cbc58b\nkubernetes v1.11.0+d4cacc0"
+    - name: CONSOLE_ADDRESS
+      value: https://master.brnocz-e4ae.openshiftworkshop.com
+    - name: OCP_APPS_BASE_URL
+      value: apps.brnocz-e4ae.openshiftworkshop.com
+    - name: DOCS_URL
+      desc: URL prefix to access docs (docs.openshift.org/latest) without the protocol prefix.
+      value: docs.openshift.com/container-platform/latest
+    - name: OPENSHIFT_USERNAME
+      value: userN
+    - name: OPENSHIFT_PASSWORD
+      value: openshift
+    - name: DOWNLOAD_CLIENT
+      desc: URL to download oc client
+      value: "https://github.com/openshift/origin/releases/"
+    - name: USER_PROJECT
+      value: userN
+    - name: WORKSHOP_BASE_URL
+      value: https://github.com/durandom/openshift_kubeflow_workshop/tree/master
+    - name: X
+      value: Y
+    - name: X
+      value: Y
+
+
+modules:
+  introduction:
+    name: Introduction
+  install-cli:
+    name: Installing CLIs
+  openshift:
+    name: Explore OpenShift
+  kubernetes:
+    name: Kubernetes Concepts
+  kubeflow:
+    name: Kubeflow Concepts
+  training-build:
+    name: Building Training Images
+    requires:
+      - kubeflow
+  training-tf-job:
+    name: Training with TF-Job
+  serving:
+    name: Serving the Model
+  training-distributed:
+    name: Distributed Training
+  links:
+    name: Useful Links

@@ -1,0 +1,71 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: tf-serving
+  annotations:
+    description: Template to deploy a TF-Serving Pod
+parameters:
+  - name: APPLICATION_NAME
+    description: Name for the Application
+    value: tf-serving
+    displayName: Name for the Application
+    required: true
+  - name: BUCKET
+    description: The S3 bucket where the model is stored
+    value: userN
+    displayName: Model Store Bucket
+    required: true
+objects:
+- kind: Deployment
+  apiVersion: extensions/v1beta1
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    template:
+      metadata:
+        labels:
+          app: ${APPLICATION_NAME}
+          version: v1
+      spec:
+        containers:
+        - image: tensorflow/serving:1.12.0
+          imagePullPolicy: IfNotPresent
+          name: tf-serving
+          args:
+          - --port=9000
+          - --rest_api_port=8500
+          - --model_name=mnist
+          - --model_base_path=s3://${BUCKET}/inception/export
+          command:
+          - /usr/bin/tensorflow_model_server
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: minio
+          - name: AWS_SECRET_ACCESS_KEY
+            value: minio123
+          - name: AWS_REGION
+            value: us-west-1
+          - name: S3_REGION
+            value: us-east-1
+          - name: S3_USE_HTTPS
+            value: "0"
+          - name: S3_VERIFY_SSL
+            value: "0"
+          - name: S3_ENDPOINT
+            value: minio-service.kubeflow.svc:9000
+          - name: TF_CPP_MIN_LOG_LEVEL
+            value: "1"
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            tcpSocket:
+              port: 9000
+          ports:
+          - containerPort: 9000
+          - containerPort: 8500
+          resources:
+            limits:
+              cpu: "4"
+              memory: 4Gi

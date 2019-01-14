@@ -1,0 +1,44 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name:
+  annotations:
+    description: Template to deploy a TF-Serving Pod
+parameters:
+  - name: APPLICATION_NAME
+    description: Name for the Application
+    value: tf-web-ui
+    displayName: Name for the Application
+    required: true
+objects:
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    labels:
+      name: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/durandom/openshift_kubeflow_workshop.git
+      type: Git
+      contextDir: "containers/web-ui/"
+    strategy:
+      type: Docker
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    dockerImageRepository: ${APPLICATION_NAME}
+    tags:
+    - name: latest
+    lookupPolicy:
+      local: true
