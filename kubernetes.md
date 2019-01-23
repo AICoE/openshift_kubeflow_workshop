@@ -43,7 +43,7 @@ When you create an object in Kubernetes, you must provide the object specificati
 
 For example, the `.yaml` file shown below includes the required fields and object spec for a Kubernetes Deployment. A Kubernetes Deployment is an object that can represent an application running on your cluster. In the example below, the Deployment spec describes the desired state of three replicas of the nginx application to be running. When you create the Deployment, the Kubernetes system reads the Deployment spec and starts three instances of your desired application, updating the status to match your spec.
 
-```yaml
+~~~yaml
 apiVersion: apps/v1beta2 # Kubernetes API version for the object
 kind: Deployment # The type of object described by this YAML, here a Deployment
 metadata:
@@ -60,7 +60,7 @@ spec: # Actual specifications of this deployment
         image: nginx:1.7.9 # Image to run
         ports: # Ports to expose
         - containerPort: 80
-```
+~~~
 
 To create all the objects described in a Deployment using a `.yaml` file like the one above in your own Kubernetes cluster you can use Kubernetes' CLI (`oc`). 
 

@@ -4,7 +4,7 @@ The code for our Tensorflow project can be found in the [containers/training]({{
 
 model.py defines a fairly straight-forward program. First it defines a simple feed-forward neural network with two hidden layers. Next, it defines tensor ops to train and evaluate the model's weights. Finally, after a number of training cycles, it saves the trained model up to a Object Storage bucket. Of course, before we can use the storage bucket, we need to create it.
 
-The code was taken from the [Kubeflow MNIST example)[https://github.com/kubeflow/examples/tree/master/mnist]
+The code was taken from the [Kubeflow MNIST example](https://github.com/kubeflow/examples/tree/master/mnist)
 
 ## Setting up file storage
 
