@@ -12,8 +12,3 @@ oc expose svc/centraldashboard -n kubeflow
 ```
 
 * add view perms to kubeflow NS for userN
-
-
-TODO workshop
-
-* make name in job and serving a param

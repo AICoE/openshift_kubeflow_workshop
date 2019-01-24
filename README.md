@@ -18,10 +18,9 @@ Most of the content is based on the work of others. Especially the prose words i
 
 This workshop is based on OpenShift 3.11 and Kubeflow 0.4.0
 
-Here is what you need to do after installing kubeflow:
+Here is what you need to do after installing kubeflow
 
-* expose minio via route
-
+[todo_install.md](todo_install.md)
 
 ## Workshop created with Workshopper
 
