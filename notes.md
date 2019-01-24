@@ -1,22 +1,5 @@
-```
-oc apply -f bc.yaml
-oc start-build training --from-dir=. -w -F
-```
-
-# create tf-job
-
-```
-oc delete tfjob/mnist-train-local ; oc apply -f tf-job.yaml
-```
-
-
-# view the output
-
-```
-oc get tfjob -o yaml
-```
-
-# tensorboard?!
+# Random Notes
+## tensorboard?!
 
 TODO: This section needs to be updated
 
@@ -30,7 +13,7 @@ kubectl port-forward ${PODNAME} 6006:6006
 Tensorboard can now be accessed at [http://127.0.0.1:6006](http://127.0.0.1:6006).
 
 
-# tf serve
+## Create tf-serve via ksonnet
 
 ```
 ks env add local
@@ -48,11 +31,24 @@ ks param set ${MODEL_COMPONENT} s3Endpoint minio-service.kubeflow.svc:9000
 ks show local -c ${MODEL_COMPONENT}
 ```
 
+## talking to tf-serve locally
 
+MODEL_NAME=mnist-model-name
+oc expose deployment/${MODEL_NAME} --port=9000
+export TF_MODEL_SERVER_HOST=$(kubectl get svc ${MODEL_NAME} --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}")
+oc port-forward svc/${MODEL_NAME} 9000:9000
+
+export TF_MNIST_IMAGE_PATH=data/7.png
+export TF_MODEL_SERVER_PORT=9000
+export TF_MODEL_SERVER_HOST=localhost
+python mnist_client.py
 
 # Issues
 
-* on RHPDS, can't create tf-job in user1 NS
+## OpenShift / RHDPS
+
+### on RHPDS, can't create tf-job in user1 NS
+
 ```
 oc apply -f tf-job.yaml
 Error from server (Forbidden): error when retrieving current configuration of:
@@ -62,12 +58,11 @@ Object: &{map["apiVersion":"kubeflow.org/v1beta1" "kind":"TFJob" "metadata":map[
 from server for: "tf-job.yaml": tfjobs.kubeflow.org "mnist-train-local" is forbidden: User "user1" cannot get tfjobs.kubeflow.org in the namespace "user1": no RBAC policy matched
 ```
 
-* on RHDPS, training image pull err
+### on RHDPS, training image pull err
 
-## Kubeflow
-* dont see tf-jobs in UI
+can't `oc run training --image training`
 
-## Openshift
+### TFJobs don't schedule pods in other NS 
 
 need to issue: 
 oc adm policy add-role-to-user cluster-admin -z tf-job-operator
@@ -89,36 +84,13 @@ E0114 10:10:24.033468       1 controller.go:255] Error syncing tfjob: pods "mnis
 {"filename":"record/event.go:218","level":"info","msg":"Event(v1.ObjectReference{Kind:\"TFJob\", Namespace:\"mhild\", Name:\"mnist-train-local\", UID:\"9b773653-17e4-11e9-9161-246e9606163c\", APIVersion:\"kubeflow.org/v1beta1\", ResourceVersion:\"13525839\", FieldPath:\"\"}): type: 'Warning' reason: 'FailedCreatePod' Error creating: pods \"mnist-train-local-worker-0\" is forbidden: cannot set blockOwnerDeletion if an ownerReference refers to a resource you can't set finalizers on: no RBAC policy matched, \u003cnil\u003e","time":"2019-01-14T10:10:24Z"}
 ```
 
+## Kubeflow
 
-https://github.com/Azure/kubeflow-labs/tree/master/0-intro
-
-
-ACCESS_KEY=minio
-ACCESS_SECRET_KEY=minio123
-SERVICE_IP=http://minio-service-kubeflow.10.8.0.139.nip.io
-S3_ENDPOINT=${SERVICE_IP}
-    
-mc config host add minio $S3_ENDPOINT $ACCESS_KEY $ACCESS_SECRET_KEY
-
-BUCKET_NAME=kubeflow
-mc mb minio/$BUCKET_NAME
-
-mc cp --recursive models minio/$BUCKET_NAME
+* dont see tf-jobs in UI
 
 
+## tf-serve
 
-docker run -it -v `pwd`/model:/tmp/tensorflow ${DOCKER_USERNAME}/tf-mnist --max_steps 100
-
-# tf-serve
-logging error:
+aws logging error:
 https://github.com/tensorflow/serving/issues/789 
 
-MODEL_NAME=mnist-model-name
-oc expose deployment/${MODEL_NAME} --port=9000
-export TF_MODEL_SERVER_HOST=$(kubectl get svc ${MODEL_NAME} --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}")
-oc port-forward svc/${MODEL_NAME} 9000:9000
-
-export TF_MNIST_IMAGE_PATH=data/7.png
-export TF_MODEL_SERVER_PORT=9000
-export TF_MODEL_SERVER_HOST=localhost
-python mnist_client.py
